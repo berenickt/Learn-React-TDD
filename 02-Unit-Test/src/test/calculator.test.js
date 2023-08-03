@@ -10,7 +10,7 @@ describe('계산기', () => {
     cal = new Calculator()
   })
 
-  // @define it => 계산기를 가리키는 3인칭 주어
+  // @define it => describe('계산기')를 가리키는 3인칭 주어
   it('0으로 초기화', () => {
     expect(cal.value).toBe(0)
   })
@@ -30,6 +30,15 @@ describe('계산기', () => {
     cal.set(1)
     cal.add(2)
     expect(cal.value).toBe(3)
+  })
+
+  it('add should throw an error if value is greater than 100', () => {
+    // @see toThrow https://jestjs.io/docs/expect#tothrowerror
+    // @see 예외처리 https://jestjs.io/docs/using-matchers#exceptions
+    // 에러메시지를 던진 후의 메시지는 실제 new Error의 메시지와 동일해야 한다.
+    expect(() => {
+      cal.add(101)
+    }).toThrow('Value can not be greater than 100')
   })
 
   it('subtract', () => {
