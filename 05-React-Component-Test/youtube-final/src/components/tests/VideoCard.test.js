@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { Route, useLocation } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
+import renderer from 'react-test-renderer'
 
 import { formatAgo } from '../../util/date'
 import VideoCard from '../VideoCard'
@@ -13,6 +14,28 @@ import { withRouter } from '../../tests/utils'
 describe('VideoCard', () => {
   // 구조분해 할당으로 풀어서 작성
   const { title, channelTitle, publishedAt, thumbnails } = video.snippet
+
+  /*** Snapshot Testing
+   * renderer
+   * @see https://jestjs.io/docs/snapshot-testing#snapshot-testing-with-jest
+   */
+  it('renders grid type correctly', () => {
+    const component = renderer.create(
+      withRouter(<Route path="/" element={<VideoCard video={video} />} />),
+    )
+
+    expect(component.toJSON()).toMatchSnapshot()
+  })
+
+  it('renders list type correctly', () => {
+    const component = renderer.create(
+      withRouter(
+        <Route path="/" element={<VideoCard video={video} type="list" />} />,
+      ),
+    )
+
+    expect(component.toJSON()).toMatchSnapshot()
+  })
 
   /** MemoryRouter
    * @see https://testing-library.com/docs/example-react-router/
