@@ -1,26 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { Route, useLocation } from 'react-router-dom'
+import userEvent from '@testing-library/user-event'
+
 import { formatAgo } from '../../util/date'
 import VideoCard from '../VideoCard'
+import { fakeVideo as video } from '../../tests/videos'
+import { withRouter } from '../../tests/utils'
 
 /**
  * @see https://v5.reactrouter.com/web/guides/testing
  */
 describe('VideoCard', () => {
-  const video = {
-    id: 1,
-    snippet: {
-      title: 'title',
-      channelId: '1',
-      channelTitle: 'channelTitle',
-      publishedAt: new Date(),
-      thumbnails: {
-        medium: {
-          url: 'http://image/',
-        },
-      },
-    },
-  }
   // 구조분해 할당으로 풀어서 작성
   const { title, channelTitle, publishedAt, thumbnails } = video.snippet
 
@@ -28,11 +18,7 @@ describe('VideoCard', () => {
    * @see https://testing-library.com/docs/example-react-router/
    */
   it('renders video item', () => {
-    render(
-      <MemoryRouter>
-        <VideoCard video={video} />
-      </MemoryRouter>,
-    )
+    render(withRouter(<Route path="/" element={<VideoCard video={video} />} />))
 
     /** screen : 화면을 가져오는 test 라이브러리
      * @see https://testing-library.com/docs/queries/about/#screen
@@ -58,5 +44,31 @@ describe('VideoCard', () => {
     expect(screen.getByText(title)).toBeInTheDocument()
     expect(screen.getByText(channelTitle)).toBeInTheDocument()
     expect(screen.getByText(formatAgo(publishedAt))).toBeInTheDocument()
+  })
+
+  /*** 비디오 카드 테스트 - 동적
+   *
+   */
+  it('navigates to detailed video page with video state when clicked', () => {
+    function LocationStateDisplay() {
+      return <pre>{JSON.stringify(useLocation().state)}</pre>
+    }
+
+    render(
+      withRouter(
+        <>
+          <Route path="/" element={<VideoCard video={video} />} />
+          <Route
+            path={`/videos/watch/${video.id}`}
+            element={<LocationStateDisplay />}
+          />
+        </>,
+      ),
+    )
+
+    const card = screen.getByRole('listitem')
+    userEvent.click(card)
+
+    expect(screen.getByText(JSON.stringify({ video }))).toBeInTheDocument()
   })
 })
